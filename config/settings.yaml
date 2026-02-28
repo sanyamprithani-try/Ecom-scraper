@@ -1,0 +1,107 @@
+# =============================================================================
+# Ecom-scraper — Site Configuration
+# =============================================================================
+# Each entry defines a scraper target.  Selectors and URL patterns are
+# documented here for easy updates when sites change their markup.
+#
+# NOTE: Actual scraping logic lives in src/scrapers/<site>.py.  This file
+# is reference documentation and is read by the config loader for any
+# overrideable values (timeouts, delays, feature flags).
+# =============================================================================
+
+defaults:
+  request_timeout_seconds: 15
+  scrape_delay_seconds: 1.0
+  max_results_per_site: 3
+  retry_attempts: 2
+
+sites:
+  nykaa:
+    enabled: true
+    base_url: "https://www.nykaa.com"
+    search_path: "/search/result/?q={query}"
+    api_path: "/gateway-api/search"
+    notes: >
+      Uses an internal gateway API that returns JSON.
+      Falls back to HTML __NEXT_DATA__ parsing.
+    anti_bot_level: moderate
+
+  tira:
+    enabled: true
+    base_url: "https://www.tirabeauty.com"
+    search_path: "/search?q={query}"
+    api_path: "/api/search"
+    notes: >
+      Reliance Retail beauty platform.  Next.js SPA with JSON
+      payloads embedded in __NEXT_DATA__.
+    anti_bot_level: low
+
+  purplle:
+    enabled: true
+    base_url: "https://www.purplle.com"
+    search_path: "/search?q={query}"
+    api_path: "/api/search"
+    notes: >
+      Dedicated beauty e-commerce.  Partially server-rendered.
+    anti_bot_level: low
+
+  sephora:
+    enabled: true
+    base_url: "https://www.sephora.in"
+    search_path: "/search?q={query}"
+    api_path: "/api/v2/search"
+    notes: >
+      Uses Algolia-backed search.  API returns structured JSON.
+      Also embeds JSON-LD product data in HTML.
+    anti_bot_level: moderate
+
+  amazon:
+    enabled: true
+    base_url: "https://www.amazon.in"
+    search_path: "/s?k={query}&i=beauty"
+    notes: >
+      Server-side rendered.  Uses data-component-type selectors.
+      AGGRESSIVE anti-bot: CAPTCHA triggers, rate limits.
+      Use proxies in production.
+    anti_bot_level: high
+
+  flipkart:
+    enabled: true
+    base_url: "https://www.flipkart.com"
+    search_path: "/search?q={query}"
+    notes: >
+      Server-side rendered.  Dynamic CSS class names — rely on
+      structural patterns and href patterns (/p/itm…).
+      May show login modal; skip with proper headers.
+    anti_bot_level: moderate
+
+  meesho:
+    enabled: true
+    base_url: "https://www.meesho.com"
+    search_path: "/search?q={query}"
+    api_path: "/api/v1/products/search"
+    notes: >
+      Fully client-side React SPA.  HTML shell is empty.
+      Must use internal API or __NEXT_DATA__.
+    anti_bot_level: low
+
+  myntra:
+    enabled: true
+    base_url: "https://www.myntra.com"
+    search_path: "/{query-slug}"
+    api_path: "/gateway/v2/search/{query-slug}"
+    notes: >
+      Heavily JS-rendered React SPA.  Internal search API
+      returns JSON.  Falls back to embedded __myx state.
+      Query is hyphenated-slug format.
+    anti_bot_level: moderate
+
+  kindlife:
+    enabled: true
+    base_url: "https://kindlife.in"
+    search_path: "/search?q={query}&type=product"
+    api_path: "/search/suggest.json"
+    notes: >
+      Shopify-based store.  The suggest.json API is the
+      fastest and most reliable extraction method.
+    anti_bot_level: low

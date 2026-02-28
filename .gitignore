@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project data output
+data/raw/
+data/processed/
+*.csv
+*.json
+!config/*.yaml
+!config/*.json
+!tests/fixtures/**/*.json
+!tests/fixtures/**/*.html
+
+# Logs
+*.log
+logs/
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# ruff
+.ruff_cache/
+
+# Playwright
+playwright-report/
+
+# Scraped output
+output/
