@@ -18,6 +18,26 @@ from src.utils.rate_limiter import RateLimiter
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _resolve_site_key(raw: str) -> str | None:
+    """Normalise a user-supplied site name to a registry key.
+
+    Accepts any casing and handles multi-word display names (e.g. "Sephora India"
+    → "sephora") by checking if the first token alone is a valid key.
+    """
+    lower = raw.lower().strip()
+    if lower in SCRAPERS:
+        return lower
+    first_word = lower.split()[0] if lower else ""
+    if first_word in SCRAPERS:
+        return first_word
+    return None
+
 # Shared across requests for connection pooling and rate limiting
 _rate_limiter = RateLimiter(delay_seconds=1.0)
 
@@ -61,10 +81,11 @@ async def search_products(request: SearchRequest) -> SearchResponse:
     query = request.query.strip()
     max_results = request.max_results
 
-    # Determine which sites to hit
-    site_keys = request.sites or ALL_SITE_KEYS
-    # Validate site keys
-    site_keys = [k for k in site_keys if k in SCRAPERS]
+    # Determine which sites to hit — normalise keys from user input
+    raw_keys = request.sites or ALL_SITE_KEYS
+    site_keys = [resolved for k in raw_keys if (resolved := _resolve_site_key(k)) is not None]
+    if not site_keys:
+        site_keys = ALL_SITE_KEYS
 
     start = time.perf_counter()
 
@@ -117,7 +138,10 @@ async def search_products_get(
     max_results: int = Query(default=3, ge=1, le=20),
 ) -> SearchResponse:
     """GET endpoint for quick browser / curl testing."""
-    site_list = [s.strip() for s in sites.split(",") if s.strip()] if sites else None
+    site_list: list[str] | None = None
+    if sites:
+        resolved = [_resolve_site_key(s) for s in sites.split(",")]
+        site_list = [k for k in resolved if k is not None] or None
     request = SearchRequest(query=q, sites=site_list, max_results=max_results)
     return await search_products(request)
 
